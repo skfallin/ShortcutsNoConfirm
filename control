@@ -1,9 +1,9 @@
-Package: it.comandi.senzaconferma
-Name: ComandiSenzaConferma
-Version: 1.0.0
+Package: com.skfallin.shortcutsnoconfirm
+Name: ShortcutsNoConfirm
+Version: 0.1.0~beta1
 Architecture: iphoneos-arm64
-Description: Esegue le automazioni di Comandi senza chiedere conferma (spegnimento, eliminazioni, conferme delle app). Attivabile da Impostazioni.
-Maintainer: comandi
-Author: comandi
+Description: Lets Shortcuts automations run without the confirmation prompts iOS still shows (Shut Down, deletions, app confirmations). Switch in Settings.
+Maintainer: skfallin
+Author: skfallin
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.3), firmware (>= 16.0)
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.3), firmware (= 16.5.1)

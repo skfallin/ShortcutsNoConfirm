@@ -8,7 +8,7 @@
 @property (copy, nonatomic) void (^successHandler)(void);
 @end
 
-static NSString *const kDomain = @"it.comandi.senzaconferma";
+static NSString *const kDomain = @"com.skfallin.shortcutsnoconfirm";
 static BOOL enabled;
 
 static void loadPrefs(CFNotificationCenterRef c, void *o, CFStringRef n, const void *obj, CFDictionaryRef info) {
@@ -61,5 +61,5 @@ static void loadPrefs(CFNotificationCenterRef c, void *o, CFStringRef n, const v
 
 %ctor {
 	loadPrefs(NULL, NULL, NULL, NULL, NULL);
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, loadPrefs, CFSTR("it.comandi.senzaconferma/preferences.changed"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, loadPrefs, CFSTR("com.skfallin.shortcutsnoconfirm/preferences.changed"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 }
