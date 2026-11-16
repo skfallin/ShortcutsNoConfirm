@@ -1,0 +1,9 @@
+Package: it.comandi.senzaconferma
+Name: ComandiSenzaConferma
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Esegue le automazioni di Comandi senza chiedere conferma (spegnimento, eliminazioni, conferme delle app). Attivabile da Impostazioni.
+Maintainer: comandi
+Author: comandi
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.3), firmware (>= 16.0)
