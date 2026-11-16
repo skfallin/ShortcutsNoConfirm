@@ -8,6 +8,39 @@
 @property (copy, nonatomic) void (^successHandler)(void);
 @end
 
+@interface WFAction : NSObject
+@end
+
+@interface WFAlertButton : NSObject
+@property (readonly, copy, nonatomic) void (^handler)(void);
+@end
+
+@interface WFAlert : NSObject
+@property (copy, nonatomic) NSArray *buttons;
+@end
+
+// Stands in for an action's userInterface: presentAlert: presses the confirm button,
+// everything else goes to the real host.
+@interface SNCAutoConfirmUserInterface : NSProxy
+@property (strong, nonatomic) id target;
+@end
+
+@implementation SNCAutoConfirmUserInterface
+- (void)presentAlert:(WFAlert *)alert {
+	// -[ShutDownDeviceAction askForConfirmationAndExecute] adds Cancel first, then Shut Down/Restart.
+	WFAlertButton *confirm = alert.buttons.lastObject;
+	if (confirm.handler) {
+		dispatch_async(dispatch_get_main_queue(), confirm.handler);
+		return;
+	}
+	[self.target presentAlert:alert];
+}
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel { return [self.target methodSignatureForSelector:sel]; }
+- (void)forwardInvocation:(NSInvocation *)invocation { [invocation invokeWithTarget:self.target]; }
+- (BOOL)respondsToSelector:(SEL)sel { return sel == @selector(presentAlert:) || [self.target respondsToSelector:sel]; }
+- (BOOL)conformsToProtocol:(Protocol *)protocol { return [self.target conformsToProtocol:protocol]; }
+@end
+
 static NSString *const kDomain = @"com.skfallin.shortcutsnoconfirm";
 static BOOL enabled;
 
@@ -50,6 +83,19 @@ static void loadPrefs(CFNotificationCenterRef c, void *o, CFStringRef n, const v
 	%orig;
 }
 
+%end
+
+// Shut Down / Restart (Swift ShutDownDeviceAction, ObjC name WFShutDownDeviceAction) builds a plain
+// WFAlert "Are you sure you want to shut down this device?" and sends it to self.userInterface.
+// Hooked on WFAction because ActionKit may load after the tweak.
+%hook WFAction
+- (id)userInterface {
+	id ui = %orig;
+	if (!enabled || !ui || ![self isKindOfClass:%c(WFShutDownDeviceAction)]) return ui;
+	SNCAutoConfirmUserInterface *proxy = [SNCAutoConfirmUserInterface alloc];
+	proxy.target = ui;
+	return proxy;
+}
 %end
 
 // Same switches as Settings > Shortcuts > Advanced; forced on while the tweak is enabled.

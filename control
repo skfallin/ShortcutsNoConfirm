@@ -1,6 +1,6 @@
 Package: com.skfallin.shortcutsnoconfirm
 Name: ShortcutsNoConfirm
-Version: 0.1.0~beta1
+Version: 0.1.0~beta2
 Architecture: iphoneos-arm64
 Description: Lets Shortcuts automations run without the confirmation prompts iOS still shows (Shut Down, deletions, app confirmations). Switch in Settings.
 Maintainer: skfallin

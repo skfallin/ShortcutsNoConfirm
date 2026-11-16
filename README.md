@@ -4,7 +4,7 @@ Rootless tweak for **iOS 16.5.1** (Dopamine) that lets Shortcuts automations run
 
 **With the switch on, the tweak accepts these prompts on your behalf. Destructive actions (shutting down, deleting data, opening a secure Home accessory) run with no chance to cancel, and for Shut Down and secure accessories the unlock request shown while the phone is locked is skipped too.** Check your automation conditions before enabling it.
 
-[Download the beta](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.1) · [Italiano](#italiano) · [Build instructions](BUILDING.md)
+[Download the beta](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.2) · [Italiano](#italiano) · [Build instructions](BUILDING.md)
 
 ## Compatibility and validation
 
@@ -12,17 +12,17 @@ Rootless tweak for **iOS 16.5.1** (Dopamine) that lets Shortcuts automations run
 | --- | --- |
 | iOS 16.5.1 (20F75), arm64e | Every hooked class, selector, block signature and response code checked against the dyld shared cache of this build |
 | Dopamine, rootless, ElleKit | Target configuration; package built and contents checked locally |
-| Shut Down from a personal automation, without prompt | Not device-tested |
+| Shut Down from a personal automation, without prompt | 0.1.0~beta1 failed on device (the action uses its own alert); beta2 fixes that path, not device-tested yet |
 | Settings switch read by the shortcut runner | Not device-tested |
 | Other iOS versions, rootful or roothide | Not supported; the package depends on `firmware (= 16.5.1)` |
 
-This beta has not been installed on a device yet. Reports from a real 16.5.1 setup are welcome, see [Limits and bug reports](#limits-and-bug-reports).
+Reports from a real 16.5.1 setup are welcome, see [Limits and bug reports](#limits-and-bug-reports).
 
 ## What it skips
 
 | Prompt | Without the tweak | With the switch on |
 | --- | --- | --- |
-| Shut Down / Restart | *Continue?* and, when locked, an unlock request | Runs immediately |
+| Shut Down / Restart | *Are you sure you want to shut down this device?* | Runs immediately |
 | Secure Home accessories (locks, gates, garage doors) | Confirmation and unlock request | Runs immediately |
 | App Intents confirmations | *Yes / No* | Answered *Yes* |
 | SiriKit intent confirmations | *Confirm / Cancel* | Confirmed |
@@ -40,8 +40,8 @@ The hooks act on the process that runs automations. Shortcuts started by hand fr
 ## Example: scheduled shutdown
 
 1. Create a personal automation *At 11:00 PM* with a single **Shut Down** action and turn **Ask Before Running** off.
-2. At 11:00 PM Shortcuts runs the action and iOS builds the *Continue?* alert.
-3. The tweak intercepts the alert and calls the same handler as the **Continue** button.
+2. At 11:00 PM Shortcuts runs the action and the action builds its *Are you sure you want to shut down this device?* alert.
+3. The tweak intercepts the alert and calls the same handler as the **Shut Down** button.
 4. The phone shuts down. No alert, no notification, also when locked.
 
 With the switch off the alert appears as on stock iOS.
@@ -49,7 +49,7 @@ With the switch off the alert appears as on stock iOS.
 ## Install and configure
 
 1. Make sure **ElleKit** (tweak injection) and **PreferenceLoader** are installed. Both are part of a standard Dopamine setup.
-2. Download `com.skfallin.shortcutsnoconfirm_0.1.0~beta1_iphoneos-arm64.deb` from the [beta release](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.1) and check it against `SHA256SUMS`.
+2. Download `com.skfallin.shortcutsnoconfirm_0.1.0~beta2_iphoneos-arm64.deb` from the [beta release](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.2) and check it against `SHA256SUMS`.
 3. Install it with Sileo, Filza or another local Debian-package installer. The shortcut runner loads the tweak the next time it starts; respring once to be sure.
 4. Open **Settings → ShortcutsNoConfirm**. The switch is on by default and changes apply immediately.
 5. Test with an automation you can trigger right away before relying on a scheduled one.
@@ -57,7 +57,7 @@ With the switch off the alert appears as on stock iOS.
 Over SSH, after uploading the `.deb` to the phone, run **on the iPhone**:
 
 ```sh
-sudo dpkg -i ./com.skfallin.shortcutsnoconfirm_0.1.0~beta1_iphoneos-arm64.deb
+sudo dpkg -i ./com.skfallin.shortcutsnoconfirm_0.1.0~beta2_iphoneos-arm64.deb
 ```
 
 ## Remove or recover
@@ -79,6 +79,7 @@ All hooks are in [Tweak.x](Tweak.x) and load into processes that use `WorkflowKi
 
 | Hook | What it does |
 | --- | --- |
+| `-[WFAction userInterface]` on `WFShutDownDeviceAction` | Returns a proxy of the real host whose `presentAlert:` runs the Shut Down / Restart button handler, the last button the action adds |
 | `-[WFDialogTransformer presentAlert:]` | If the alert is a `WFSecureConfirmationAlert`, built by `-[WFAction(RequestUnlock) requestUnlock:]`, calls its `successHandler` instead of presenting it |
 | `-[WFDialogTransformer showLinkActionConfirmationWithActionMetadata:…completionHandler:]` | Replies `1`, the code of the Yes button in `WFLinkConfirmationDialogViewController` |
 | `-[WFDialogTransformer showConfirmInteraction:prompt:requireAuthentication:completionHandler:]` | Replies `1`, the confirmed code in `WFInteractionDialogViewController` |
@@ -108,7 +109,7 @@ Tweak rootless per **iOS 16.5.1** (Dopamine) che permette alle automazioni di Co
 | --- | --- |
 | iOS 16.5.1 (20F75), arm64e | Classi, selettori, firme dei blocchi e codici di risposta verificati sulla dyld shared cache di questa build |
 | Dopamine, rootless, ElleKit | Configurazione prevista; pacchetto compilato e contenuto controllato in locale |
-| Spegnimento da automazione personale, senza conferma | Non testato sul dispositivo |
+| Spegnimento da automazione personale, senza conferma | Con 0.1.0~beta1 non funzionava (l'azione usa un suo avviso); beta2 corregge quel percorso, non ancora testata sul dispositivo |
 | Lettura dell'interruttore da parte del runner dei comandi | Non testato sul dispositivo |
 | Altre versioni di iOS, rootful o roothide | Non supportate; il pacchetto dipende da `firmware (= 16.5.1)` |
 
@@ -116,7 +117,7 @@ Tweak rootless per **iOS 16.5.1** (Dopamine) che permette alle automazioni di Co
 
 | Richiesta | Senza tweak | Con l'interruttore attivo |
 | --- | --- | --- |
-| Spegni / Riavvia | *Vuoi continuare?* e, se bloccato, richiesta di sblocco | Eseguito subito |
+| Spegni / Riavvia | *Confermi di voler spegnere iPhone?* | Eseguito subito |
 | Accessori Casa protetti (serrature, cancelli, garage) | Conferma e richiesta di sblocco | Eseguito subito |
 | Conferme App Intents | *Sì / No* | Risposto *Sì* |
 | Conferme degli intent SiriKit | *Conferma / Annulla* | Confermato |
@@ -128,8 +129,8 @@ Non tocca **Chiedi prima di eseguire** (da disattivare nell'automazione), gli av
 ### Esempio: spegnimento programmato
 
 1. Crea un'automazione personale *Alle 23:00* con la sola azione **Spegni** e disattiva **Chiedi prima di eseguire**.
-2. Alle 23:00 Comandi esegue l'azione e iOS prepara l'avviso *Vuoi continuare?*.
-3. Il tweak intercetta l'avviso e chiama lo stesso gestore del pulsante **Continua**.
+2. Alle 23:00 Comandi esegue l'azione e l'azione prepara l'avviso *Confermi di voler spegnere iPhone?*.
+3. Il tweak intercetta l'avviso e chiama lo stesso gestore del pulsante **Spegni**.
 4. Il telefono si spegne. Nessun avviso, nessuna notifica, anche se è bloccato.
 
 Con l'interruttore spento l'avviso compare come su iOS originale.
@@ -137,7 +138,7 @@ Con l'interruttore spento l'avviso compare come su iOS originale.
 ### Installazione e configurazione
 
 1. Verifica di avere **ElleKit** (iniezione dei tweak) e **PreferenceLoader**, presenti in una normale installazione di Dopamine.
-2. Scarica `com.skfallin.shortcutsnoconfirm_0.1.0~beta1_iphoneos-arm64.deb` dalla [release beta](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.1) e controllalo con `SHA256SUMS`.
+2. Scarica `com.skfallin.shortcutsnoconfirm_0.1.0~beta2_iphoneos-arm64.deb` dalla [release beta](https://github.com/skfallin/ShortcutsNoConfirm/releases/tag/v0.1.0-beta.2) e controllalo con `SHA256SUMS`.
 3. Installalo con Sileo, Filza o un altro installer di pacchetti Debian. Il runner dei comandi carica il tweak al prossimo avvio; per sicurezza fai un respring.
 4. Apri **Impostazioni → ShortcutsNoConfirm**. L'interruttore è attivo di default e le modifiche valgono subito.
 5. Prova con un'automazione che puoi avviare subito prima di affidarti a una programmata.
@@ -145,7 +146,7 @@ Con l'interruttore spento l'avviso compare come su iOS originale.
 Via SSH, dopo aver caricato il `.deb` sul telefono, esegui **sull'iPhone**:
 
 ```sh
-sudo dpkg -i ./com.skfallin.shortcutsnoconfirm_0.1.0~beta1_iphoneos-arm64.deb
+sudo dpkg -i ./com.skfallin.shortcutsnoconfirm_0.1.0~beta2_iphoneos-arm64.deb
 ```
 
 ### Rimozione e ripristino

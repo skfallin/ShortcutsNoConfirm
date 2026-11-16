@@ -21,7 +21,7 @@ make clean package FINALPACKAGE=1
 
 The Makefile defaults to rootless packaging, `arm64` and `arm64e`, SDK 16.5 and a deployment target of 16.5. Keep the package's exact `firmware (= 16.5.1)` dependency unless testing establishes support for another version.
 
-The package is written to `packages/com.skfallin.shortcutsnoconfirm_0.1.0~beta1_iphoneos-arm64.deb`.
+The package is written to `packages/com.skfallin.shortcutsnoconfirm_0.1.0~beta2_iphoneos-arm64.deb`.
 
 ## Package checks
 
